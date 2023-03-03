@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: pers-zubkov
+  name: postgres-sql-test
+  annotations: {}
+spec:
+  selector:
+    matchLabels:
+      app: postgres-sql-test
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: postgres-sql-test
+    spec:
+      containers:
+        - name: container
+          image: 'postgres:15.2-alpine'
+          ports:
+            - containerPort: 5432
+              protocol: TCP
+          env:
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql
+                  key: database-user
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql
+                  key: database-password
+      imagePullSecrets: []
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  paused: false
